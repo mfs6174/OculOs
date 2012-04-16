@@ -10,14 +10,28 @@ const int maxlongint=2147483647;
 
 int main(int argc, char *argv[])
 {
-  IplImage* src=0,dst=0,logp=0,dctp=0; 
-  img=cvLoadImage(argv[1]);
-  if(!img)
+  IplImage* src=NULL;
+  src=cvLoadImage(argv[1],CV_LOAD_IMAGE_ANYCOLOR);
+  if(!src)
     cout<<"Could not load image file: "<<argv[1]<<endl;
-  dst=cvCreateImage(cvGetSize(src),src->depth,1);
-  logp=cvCreateImage(cvGetSize(src),IPL_DEPTH_32F,1);
-  dctp=cvCreateImage(cvGetSize(src),IPL_DEPTH_32F,1);
-  cvLog(src,logp);
+  IplImage* dst=cvCreateImage(cvGetSize(src),src->depth,1);
+  IplImage* logp=cvCreateImage(cvGetSize(src),IPL_DEPTH_32F,1);
+  IplImage* dctp=cvCreateImage(cvGetSize(src),IPL_DEPTH_32F,1);
+  cvScale(src,logp);
+  cvLog(logp,logp);
   cvDCT(logp,dctp,CV_DXT_FORWARD);
+  cvNamedWindow("DCT",CV_WINDOW_AUTOSIZE);
+  cvMoveWindow("DCT",100,100);
+  cvShowImage("DCT",logp);
+  if (cvWaitKey(0)>=0)
+  {
+    cvReleaseImage(&dst);
+    cvReleaseImage(&logp);
+    cvReleaseImage(&dctp);
+    cvDestroyAllWindows();
+  }
+  return 0;
+}
+
   
   
