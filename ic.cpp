@@ -18,10 +18,28 @@ int main(int argc, char *argv[])
   IplImage* logp=cvCreateImage(cvGetSize(src),IPL_DEPTH_32F,1);
   IplImage* dctp=cvCreateImage(cvGetSize(src),IPL_DEPTH_32F,1);
   cvScale(src,logp);
+  cvAddS(logp,cvScalar(1.0),logp);
   cvLog(logp,logp);
   cvDCT(logp,dctp,CV_DXT_FORWARD);
   cvNamedWindow("DCT",CV_WINDOW_AUTOSIZE);
   cvMoveWindow("DCT",100,100);
+  BwImageFloat fsh(dctp);
+  double Rf=min(dctp->height,dctp->width)/64.0;
+  Rf=Rf*Rf;
+  double rr=0,conv=5.54518*sqrt(dctp->height*dctp->width);
+  for (int i=0;i<dctp->height;i++)
+  {
+    if (i*i>Rf)
+      break;
+    for (int j=0;j<dctp->width;j++)
+    {
+      rr=i*i+j*j;
+      if (rr>Rf)
+        break;
+      fsh[i][j]=0;
+    }
+  }
+  cvDCT(dctp,logp,CV_DXT_INVERSE);
   cvShowImage("DCT",logp);
   if (cvWaitKey(0)>=0)
   {
