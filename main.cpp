@@ -8,6 +8,7 @@
 #include "opencv2/opencv.hpp"
 #include "mycv.h"
 #include "IC.h"
+#include "CL.h"
 using namespace std;
 using namespace cv;
 const int maxlongint=2147483647;
@@ -27,7 +28,8 @@ int main(int argc, char *argv[])
   // cvShowImage("DCT",icp);
   if (cvWaitKey(0)>=0)
   {
-    cvReleaseImage(&dst);
+    cvReleaseImage(&icp);
+    cvReleaseImage(&cpp);
     cvDestroyAllWindows();
   }
   return 0;
