@@ -18,11 +18,13 @@ int main(int argc, char *argv[])
   src=cvLoadImage(argv[1],CV_LOAD_IMAGE_ANYCOLOR);
   if(!src)
     cout<<"Could not load image file: "<<argv[1]<<endl;
-  IplImage* dst=cvCreateImage(cvGetSize(src),src->depth,1);
-  OI10nC10n(src,dst);
-  cvNamedWindow("DCT",CV_WINDOW_AUTOSIZE);
-  cvMoveWindow("DCT",100,100);
-  cvShowImage("DCT",dst);
+  IplImage* icp=cvCreateImage(cvGetSize(src),src->depth,1);
+  IplImage* cpp=cvCreateImage(cvGetSize(src),src->depth,1);
+  OI10nC10n(src,icp);
+  OCoarsePoints(icp,cpp);
+  // cvNamedWindow("DCT",CV_WINDOW_AUTOSIZE);
+  // cvMoveWindow("DCT",100,100);
+  // cvShowImage("DCT",icp);
   if (cvWaitKey(0)>=0)
   {
     cvReleaseImage(&dst);
