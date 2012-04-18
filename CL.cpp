@@ -39,7 +39,7 @@ void OCoarsePoints(IplImage *src,IplImage *dst)
   for (int i=0;i<bh->height;i++)
     for (int j=0;j<bh->width;j++)
       histcnt[fsh[i][j]]++;
-  int nc=(int)(bh->height*bh->width*0.043),hsum=0,trhd=0;
+  int nc=(int)(bh->height*bh->width*0.027),hsum=0,trhd=0;
   for (int i=255;i>=0;i--)
   {
     hsum+=histcnt[i];
