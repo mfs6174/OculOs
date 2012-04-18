@@ -16,22 +16,38 @@ const int maxlongint=2147483647;
 int main(int argc, char *argv[])
 {
   IplImage* src=NULL;
-  src=cvLoadImage(argv[1],CV_LOAD_IMAGE_ANYCOLOR);
-  if(!src)
-    cout<<"Could not load image file: "<<argv[1]<<endl;
-  IplImage* icp=cvCreateImage(cvGetSize(src),src->depth,1);
-  IplImage* cpp=cvCreateImage(cvGetSize(src),src->depth,1);
-  OI10nC10n(src,icp);
-  OCoarsePoints(icp,cpp);
-  
-  // cvNamedWindow("DCT",CV_WINDOW_AUTOSIZE);
-  // cvMoveWindow("DCT",300,100);
-  // cvShowImage("DCT",icp);
-  if (cvWaitKey(0)>=0)
+  if (argc<2)
   {
-    cvReleaseImage(&icp);
-    cvReleaseImage(&cpp);
-    cvDestroyAllWindows();
+    CvCapture* capture = NULL;
+	IplImage* frame = NULL;
+	capture = cvCaptureFromCAM(0);
+    if (!cvGrabFrame(capture))
+    {
+      cout<<"can not capture"<<endl;
+      exit(0);
+    }
+    frame=cvQueryFrame(capture);
+    
+  }
+  else
+  {
+    src=cvLoadImage(argv[1],CV_LOAD_IMAGE_ANYCOLOR);
+    if(!src)
+      cout<<"Could not load image file: "<<argv[1]<<endl;
+    IplImage* icp=cvCreateImage(cvGetSize(src),src->depth,1);
+    IplImage* cpp=cvCreateImage(cvGetSize(src),src->depth,1);
+    OI10nC10n(src,icp);
+    OCoarsePoints(icp,cpp);
+    
+    // cvNamedWindow("DCT",CV_WINDOW_AUTOSIZE);
+    // cvMoveWindow("DCT",300,100);
+  // cvShowImage("DCT",icp);
+    if (cvWaitKey(0)>=0)
+    {
+      cvReleaseImage(&icp);
+      cvReleaseImage(&cpp);
+      cvDestroyAllWindows();
+    }
   }
   return 0;
 }

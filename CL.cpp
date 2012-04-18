@@ -51,9 +51,10 @@ void OCoarsePoints(IplImage *src,IplImage *dst)
   }
   cvThreshold(bh, bh, trhd, 255, CV_THRESH_BINARY);
   BwImage wpsh(dst);
+  int bd=bh->height/3;
   for (int i=0;i<bh->height;i++)
     for (int j=0;j<bh->width;j++)
-      if (fsh[i][j]>0)
+      if (fsh[i][j]>0 && i<=bd)
         wpsh[i][j]=PeakThresh(i,j,src);
       else
         wpsh[i][j]=0;
