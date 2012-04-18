@@ -23,8 +23,9 @@ int main(int argc, char *argv[])
   IplImage* cpp=cvCreateImage(cvGetSize(src),src->depth,1);
   OI10nC10n(src,icp);
   OCoarsePoints(icp,cpp);
+  
   // cvNamedWindow("DCT",CV_WINDOW_AUTOSIZE);
-  // cvMoveWindow("DCT",100,100);
+  // cvMoveWindow("DCT",300,100);
   // cvShowImage("DCT",icp);
   if (cvWaitKey(0)>=0)
   {
