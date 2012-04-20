@@ -16,7 +16,7 @@ void OI10nC10n(IplImage *src,IplImage *dst)
   BwImageFloat fsh(dctp);
   //double Rf=min(dctp->height,dctp->width)/96.0;
   //Rf=Rf*Rf;
-  int ddis=(dctp->height+dctp->width)/64;
+  int ddis=(dctp->height+dctp->width)/72;
   double conv=log(120)*sqrt(dctp->height*dctp->width);
   for (int i=0;i<dctp->height;i++)
   {

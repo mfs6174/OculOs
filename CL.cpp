@@ -6,7 +6,7 @@
 using namespace std;
 using namespace cv;
 
-const int wdsz=5/2;
+const int wdsz=7/2;
 
 inline uchar PeakThresh(int x,int y,IplImage *src)
 {
@@ -39,7 +39,7 @@ void OCoarsePoints(IplImage *src,IplImage *dst)
   for (int i=0;i<bh->height;i++)
     for (int j=0;j<bh->width;j++)
       histcnt[fsh[i][j]]++;
-  int nc=(int)(bh->height*bh->width*0.027),hsum=0,trhd=0;
+  int nc=(int)(bh->height*bh->width*0.016),hsum=0,trhd=0;
   for (int i=255;i>=0;i--)
   {
     hsum+=histcnt[i];
@@ -58,9 +58,9 @@ void OCoarsePoints(IplImage *src,IplImage *dst)
         wpsh[i][j]=PeakThresh(i,j,src);
       else
         wpsh[i][j]=0;
-  cvNamedWindow("th",CV_WINDOW_AUTOSIZE);
-  cvMoveWindow("th",200,100);
-  cvShowImage("th",dst);
+  // cvNamedWindow("th",CV_WINDOW_AUTOSIZE);
+  // cvMoveWindow("th",200,100);
+  // cvShowImage("th",dst);
   cvReleaseStructuringElement(&cls);
   cvReleaseImage(&bh);
   //cvReleaseImage(&th);

@@ -61,10 +61,15 @@ int main(int argc, char *argv[])
     IplImage* cpp=cvCreateImage(cvGetSize(src),src->depth,1);
     OI10nC10n(src,icp);
     OCoarsePoints(icp,cpp);
-    
-    // cvNamedWindow("DCT",CV_WINDOW_AUTOSIZE);
-    // cvMoveWindow("DCT",300,100);
-  // cvShowImage("DCT",icp);
+    BwImage sh0(icp);
+    BwImage sh1(cpp);
+    for (int i=0;i<src->height;i++)
+      for (int j=0;j<src->width;j++)
+        if (sh1[i][j])
+          sh0[i][j]=0;
+    cvNamedWindow("DCT",CV_WINDOW_AUTOSIZE);
+    cvMoveWindow("DCT",300,100);
+    cvShowImage("DCT",cpp);
     if (cvWaitKey(0)>=0)
     {
       cvReleaseImage(&icp);
