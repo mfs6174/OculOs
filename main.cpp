@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
     }
     frame=cvQueryFrame(capture);
     facep=cvCreateImage(cvGetSize(frame),frame->depth,3);
-    OFDInit();
+    OFDInit(frame);
     cvNamedWindow("cam0",CV_WINDOW_AUTOSIZE);
     cvMoveWindow("cam0",0,100);
     cvNamedWindow("procam",CV_WINDOW_AUTOSIZE);
@@ -42,9 +42,11 @@ int main(int argc, char *argv[])
     {
       frame=cvQueryFrame(capture);
       flist=OFaceDetect(frame,facep);
+      for (int i=0;i<flist.size();i++)
+        cvRectangle(facep,cvPoint(flist[i].x,flist[i].y),cvPoint(flist[i].x+flist[i].width,flist[i].y+flist[i].height),CV_RGB(255,0,0));
       cvShowImage("cam0",frame);
       cvShowImage("procam",facep);
-      if (cvWaitKey(1)>=0)
+      if (cvWaitKey(20)>=0)
         break;
 	}
     cvReleaseCapture(&capture);

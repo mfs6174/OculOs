@@ -3,6 +3,6 @@
 
 vector<CvRect> OFaceDetect(IplImage *src,IplImage *dst);
 void OFDRelease();
-void OFDInit();
+void OFDInit(IplImage *src);
 
 #endif

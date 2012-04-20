@@ -22,7 +22,16 @@ CvMat* mii;
 CvMat* OZ;
 CvMat* OE;
 CvMat* OP;
+IplImage* wp0;
+
 double kr,kg,kb;
+int fa[650][490];
+int sdidx;
+int cn[10000][4];
+int ar[10000];
+double qp[11000],qm[11000];
+int W,H;
+bool flag;
 inline int trimin(uchar x,uchar y,uchar z)
 {
   if (x>y)
@@ -76,57 +85,103 @@ inline void GetE(IplImage *src)
     g+=gsum[i];
     b+=bsum[i];
   }
-  //cout<<r/mm<<endl;
   CV_MAT_ELEM(*OE,float,0,0)=r/mm;
   CV_MAT_ELEM(*OE,float,0,1)=g/mm;
   CV_MAT_ELEM(*OE,float,0,2)=b/mm;
  
 }
 
-inline void WhiteBalance(IplImage *src,IplImage *dst,CvMat *mt,double b)
+inline void WhiteBalance(IplImage *src,IplImage *dst,CvMat *mt)
 {
   RgbImage ssh(src);
-  RgbImage dsh(dst);
+  RgbImage dsh(wp0);
   int i,j;
+  double rr,gg;
+  int r,g,b;
+  // for (i=0;i<src->height;i++)
+  //   for (j=0;j<src->width;j++)
+  //   {
+  //     // CV_MAT_ELEM(*mii,float,0,0)=ssh[i][j].r;
+  //     // CV_MAT_ELEM(*mii,float,0,1)=ssh[i][j].g;
+  //     // CV_MAT_ELEM(*mii,float,0,2)=ssh[i][j].b;
+  //     // cvMatMul(mii,mt,mi);
+  //     // for (int k=0;k<3;k++)
+  //     // {
+  //     //   CV_MAT_ELEM(*mi,float,0,k)*=b;
+  //     //   if (CV_MAT_ELEM(*mi,float,0,k)<0)
+  //     //     CV_MAT_ELEM(*mi,float,0,k)=0;
+  //     //   if (CV_MAT_ELEM(*mi,float,0,k)>255)
+  //     //     CV_MAT_ELEM(*mi,float,0,k)=255;
+  //     // }
+  //     // dsh[i][j].r=CV_MAT_ELEM(*mi,float,0,0);
+  //     // dsh[i][j].g=CV_MAT_ELEM(*mi,float,0,1);
+  //     // dsh[i][j].b=CV_MAT_ELEM(*mi,float,0,2);
+  //     r=ssh[i][j].r*kr;
+  //     g=ssh[i][j].g*kg;
+  //     b=ssh[i][j].b*kb;
+  //     if (r>255)
+  //       dsh[i][j].r=255;
+  //     else
+  //       dsh[i][j].r=r;
+  //     if (g>255)
+  //       dsh[i][j].g=255;
+  //     else
+  //       dsh[i][j].g=g;
+  //     if (b>255)
+  //       dsh[i][j].b=255;
+  //     else
+  //       dsh[i][j].b=b;
+  //   }
+  cvSmooth(src,dst,CV_MEDIAN);
+  dsh=RgbImage(dst);
   for (i=0;i<src->height;i++)
     for (j=0;j<src->width;j++)
     {
-      // CV_MAT_ELEM(*mii,float,0,0)=ssh[i][j].r;
-      // CV_MAT_ELEM(*mii,float,0,1)=ssh[i][j].g;
-      // CV_MAT_ELEM(*mii,float,0,2)=ssh[i][j].b;
-      // cvMatMul(mii,mt,mi);
-      // for (int k=0;k<3;k++)
-      // {
-      //   CV_MAT_ELEM(*mi,float,0,k)*=b;
-      //   if (CV_MAT_ELEM(*mi,float,0,k)<0)
-      //     CV_MAT_ELEM(*mi,float,0,k)=0;
-      //   if (CV_MAT_ELEM(*mi,float,0,k)>255)
-      //     CV_MAT_ELEM(*mi,float,0,k)=255;
-      // }
-      // dsh[i][j].r=CV_MAT_ELEM(*mi,float,0,0);
-      // dsh[i][j].g=CV_MAT_ELEM(*mi,float,0,1);
-      // dsh[i][j].b=CV_MAT_ELEM(*mi,float,0,2);
-      int r,g,b;
-      r=ssh[i][j].r*kr;
-      g=ssh[i][j].g*kg;
-      b=ssh[i][j].b*kb;
-      if (r>255)
-        dsh[i][j].r=255;
-      else
-        dsh[i][j].r=r;
-      if (g>255)
-        dsh[i][j].g=255;
-      else
-        dsh[i][j].g=g;
-      if (b>255)
-        dsh[i][j].b=255;
-      else
-        dsh[i][j].b=b;
-      
+      double sum=dsh[i][j].r+dsh[i][j].b+dsh[i][j].g;
+      rr=dsh[i][j].r/sum;
+      gg=dsh[i][j].g/sum;
+      if (rr>0.35 && rr<0.55 && gg<qp[(int)(rr/0.0001)] && gg>qm[(int)(rr/0.0001)])
+        if ( sqr(rr-0.33)+sqr(gg-0.33)>0.008 )
+        {
+          fa[i][j]=-1;
+        }
     }
 }
 
-void OFDInit()
+void FloodFill(int x,int y)
+{
+  if (flag)
+  {
+    sdidx++;
+    flag=false;
+    cn[sdidx][0]=cn[sdidx][1]=x;
+    cn[sdidx][2]=cn[sdidx][3]=y;
+  }
+  fa[x][y]=sdidx;
+  ar[sdidx]++;
+  cn[sdidx][0]=min(cn[sdidx][0],x);
+  cn[sdidx][1]=max(cn[sdidx][1],x);
+  cn[sdidx][2]=min(cn[sdidx][2],y);
+  cn[sdidx][3]=max(cn[sdidx][3],y);
+  if ( fa[x+1][y]==-1 && x+1<H )
+    FloodFill(x+1,y);
+  if (fa[x-1][y]==-1 && x-1>=0 )
+    FloodFill(x-1,y);
+  if (fa[x][y+1]==-1 && y+1<W)
+    FloodFill(x,y+1);
+  if (fa[x][y-1]==-1 && y-1>=0)
+    FloodFill(x,y-1);
+  if ( fa[x+1][y+1]==-1 && x+1<H &&y+1<W )
+    FloodFill(x+1,y+1);
+  if (fa[x-1][y-1]==-1 && x-1>=0 && y-1>=0 )
+    FloodFill(x-1,y-1);
+  if (fa[x-1][y+1]==-1 && y+1<W && x-1>=0)
+    FloodFill(x-1,y+1);
+  if (fa[x+1][y-1]==-1 && y-1>=0 && x+1<H)
+    FloodFill(x+1,y-1);
+}
+
+void OFDInit(IplImage *src)
 {
   mr=cvCreateMat(3,3,CV_32FC1);
   mg=cvCreateMat(3,3,CV_32FC1);
@@ -148,8 +203,16 @@ void OFDInit()
   cvSetZero(mb);
   CV_MAT_ELEM(*mr,float,0,0)=1;
   CV_MAT_ELEM(*mg,float,1,1)=1;
-  //唉话说我现在已经被迫有在打dota的舍友附近写代码的能力了
   CV_MAT_ELEM(*mb,float,2,2)=1;
+  wp0=cvCreateImage(cvGetSize(src),src->depth,3);
+  W=src->width;
+  H=src->height;
+  for (int i=0;i<=10000;i++)
+  {
+    double rr=i*0.0001;
+    qp[i]=(-1.3767*sqr(rr)+1.0743*rr+0.1452);
+    qm[i]=(-0.776*sqr(rr)+0.5601*rr+0.1766);
+  } 
 }
 
 void OFDRelease()
@@ -166,11 +229,11 @@ void OFDRelease()
   cvReleaseMat(&OE);
   cvReleaseMat(&OP);
   cvReleaseMat(&OZ);
+  cvReleaseImage(&wp0);
 }
 
 vector<CvRect> OFaceDetect(IplImage *src,IplImage *dst)
 {
-  //IplImage* wp0=cvCreateImage(cvGetSize(src),src->depth,3);
   vector<CvRect> list;
   list.clear();
   GetE(src);
@@ -205,7 +268,24 @@ vector<CvRect> OFaceDetect(IplImage *src,IplImage *dst)
   cvMatMul(mtt,mgt,mt);
   cvMatMul(mt,mrt,mtt);
   double beta=cvNorm(OP)/cvNorm(OE);
-  WhiteBalance(src,dst,mtt,beta);
-  
+  memset(fa,0,sizeof(fa));
+  WhiteBalance(src,dst,mtt);
+  sdidx=0;
+  memset(ar,0,sizeof(ar));
+  //memset(cn,0,sizeof(cn));
+  for (int i=0;i<src->height;i++)
+    for (int j=0;j<src->width;j++)
+      if (fa[i][j]==-1)
+      {
+        flag=true;
+        FloodFill(i,j);
+      }
+  int ccc=0;
+  for (int i=1;i<=sdidx;i++)
+  {
+    int w=cn[i][3]-cn[i][2],h=cn[i][1]-cn[i][0];
+    if (ar[i]>=19200 && h<=2.5*w && h>=0.4*w)
+      list.push_back(cvRect(cn[i][2],cn[i][0],w,h));
+  }
   return list;
 }
