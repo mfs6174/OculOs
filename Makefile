@@ -10,3 +10,5 @@ FD.o: FD.cpp FD.h
 	g++ -g -pg -Wall `pkg-config --libs --cflags opencv` -o  FD.o -c FD.cpp
 FL.o: FL.cpp FL.h
 	g++ -g -pg -Wall `pkg-config --libs --cflags opencv` -o  FL.o -c FL.cpp
+clean:
+	rm -rf *.o OculOs

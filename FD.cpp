@@ -23,9 +23,10 @@ CvMat* OZ;
 CvMat* OE;
 CvMat* OP;
 IplImage* wp0;
+BwImage fa;
 
 double kr,kg,kb;
-int fa[650][490];
+//int fa[650][490];
 int sdidx;
 int cn[10000][4];
 int ar[10000];
@@ -93,7 +94,7 @@ inline void GetE(IplImage *src)
 
 inline void WhiteBalance(IplImage *src,IplImage *dst,CvMat *mt)
 {
-  //BwImage ssh(wp0);
+  BwImage stsh(wp0);
   RgbImage ssh(src);
   int i,j;
   double rr,gg;
@@ -140,12 +141,14 @@ inline void WhiteBalance(IplImage *src,IplImage *dst,CvMat *mt)
       double sum=dsh[i][j].r+dsh[i][j].b+dsh[i][j].g;
       rr=dsh[i][j].r/sum;
       gg=dsh[i][j].g/sum;
+      stsh[i][j]=0;
       if (rr>0.4 && rr<0.6 && gg<qp[(int)(rr/0.0001)] && gg>qm[(int)(rr/0.0001)])
-        if ( sqr(rr-0.33)+sqr(gg-0.33)>0.01 )
+        if ( sqr(rr-0.33)+sqr(gg-0.33)>0.0075 )
         {
-          fa[i][j]=-1;
+          stsh[i][j]=255;
         }
     }
+  cvDilate(wp0,wp0,NULL,2);      
 }
 
 void FloodFill(int x,int y)
@@ -157,27 +160,27 @@ void FloodFill(int x,int y)
     cn[sdidx][0]=cn[sdidx][1]=x;
     cn[sdidx][2]=cn[sdidx][3]=y;
   }
-  fa[x][y]=sdidx;
+  fa[x][y]=1;
   ar[sdidx]++;
   cn[sdidx][0]=min(cn[sdidx][0],x);
   cn[sdidx][1]=max(cn[sdidx][1],x);
   cn[sdidx][2]=min(cn[sdidx][2],y);
   cn[sdidx][3]=max(cn[sdidx][3],y);
-  if ( fa[x+1][y]==-1 && x+1<H )
+  if ( fa[x+1][y]==255 && x+1<H )
     FloodFill(x+1,y);
-  if (fa[x-1][y]==-1 && x-1>=0 )
+  if (fa[x-1][y]==255 && x-1>=0 )
     FloodFill(x-1,y);
-  if (fa[x][y+1]==-1 && y+1<W)
+  if (fa[x][y+1]==255 && y+1<W)
     FloodFill(x,y+1);
-  if (fa[x][y-1]==-1 && y-1>=0)
+  if (fa[x][y-1]==255 && y-1>=0)
     FloodFill(x,y-1);
-  if ( fa[x+1][y+1]==-1 && x+1<H &&y+1<W )
+  if ( fa[x+1][y+1]==255 && x+1<H &&y+1<W )
     FloodFill(x+1,y+1);
-  if (fa[x-1][y-1]==-1 && x-1>=0 && y-1>=0 )
+  if (fa[x-1][y-1]==255 && x-1>=0 && y-1>=0 )
     FloodFill(x-1,y-1);
-  if (fa[x-1][y+1]==-1 && y+1<W && x-1>=0)
+  if (fa[x-1][y+1]==255 && y+1<W && x-1>=0)
     FloodFill(x-1,y+1);
-  if (fa[x+1][y-1]==-1 && y-1>=0 && x+1<H)
+  if (fa[x+1][y-1]==255 && y-1>=0 && x+1<H)
     FloodFill(x+1,y-1);
 }
 
@@ -205,6 +208,7 @@ void OFDInit(IplImage *src)
   CV_MAT_ELEM(*mg,float,1,1)=1;
   CV_MAT_ELEM(*mb,float,2,2)=1;
   wp0=cvCreateImage(cvGetSize(src),src->depth,1);
+  fa=BwImage(wp0);
   W=src->width;
   H=src->height;
   for (int i=0;i<=10000;i++)
@@ -213,8 +217,8 @@ void OFDInit(IplImage *src)
     qp[i]=(-1.3767*sqr(rr)+1.0743*rr+0.1452);
     qm[i]=(-0.776*sqr(rr)+0.5601*rr+0.1766);
   }
-  cvNamedWindow("procam",CV_WINDOW_AUTOSIZE);
-  cvMoveWindow("procam",700,100);
+  //cvNamedWindow("procam",CV_WINDOW_AUTOSIZE);
+  //cvMoveWindow("procam",700,100);
 }
 
 void OFDRelease()
@@ -270,15 +274,15 @@ vector<CvRect> OFaceDetect(IplImage *src,IplImage *dst)
   cvMatMul(mtt,mgt,mt);
   cvMatMul(mt,mrt,mtt);
   double beta=cvNorm(OP)/cvNorm(OE);
-  memset(fa,0,sizeof(fa));
+  //memset(fa,0,sizeof(fa));
   WhiteBalance(src,dst,mtt);
-  cvShowImage("procam",wp0);
+  //cvShowImage("procam",wp0);
   sdidx=0;
   memset(ar,0,sizeof(ar));
   //memset(cn,0,sizeof(cn));
   for (int i=0;i<src->height;i++)
     for (int j=0;j<src->width;j++)
-      if (fa[i][j]==-1)
+      if (fa[i][j]==255)
       {
         flag=true;
         FloodFill(i,j);

@@ -22,6 +22,7 @@ void OFLInit()
 int OFineLocate(IplImage *src,IplImage *dst,IplImage *mask,bool flag)
 {
   int w,h,x,y;
+  static int ms=flag?1:7;
   int minw=(int)(src->width/2.2),minh=(int)(minw*0.65);
   cvCopy(src,dst);
   BwImage sh0(mask);
@@ -62,7 +63,7 @@ int OFineLocate(IplImage *src,IplImage *dst,IplImage *mask,bool flag)
   cvSetImageROI(src,eal);
   sROI=Mat(src);
   cas.detectMultiScale( sROI, leyes,
-                        1.05, 1, 0
+                        1.05, ms, 0
                         |CV_HAAR_FIND_BIGGEST_OBJECT
                         //|CV_HAAR_DO_ROUGH_SEARCH
                         //|CV_HAAR_DO_CANNY_PRUNING
@@ -97,7 +98,7 @@ int OFineLocate(IplImage *src,IplImage *dst,IplImage *mask,bool flag)
   cvSetImageROI(src,cvRect(x,y,w,h));
   sROI=Mat(src);
   cas.detectMultiScale( sROI, reyes,
-                        1.05, 1, 0
+                        1.05, ms, 0
                         |CV_HAAR_FIND_BIGGEST_OBJECT
                         //|CV_HAAR_DO_ROUGH_SEARCH
                         //|CV_HAAR_DO_CANNY_PRUNING

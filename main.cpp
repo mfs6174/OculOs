@@ -25,8 +25,9 @@ int main(int argc, char *argv[])
   if (argc<2)
   {
     CvCapture* capture = NULL;
-	IplImage* frame = NULL;
+	IplImage* rframe = NULL;
     IplImage* facep=NULL;
+    IplImage *frame=NULL;
     vector<CvRect> flist;
 	capture = cvCaptureFromCAM(0);
     if (!cvGrabFrame(capture))
@@ -34,7 +35,8 @@ int main(int argc, char *argv[])
       cout<<"can not capture"<<endl;
       exit(0);
     }
-    frame=cvQueryFrame(capture);
+    rframe=cvQueryFrame(capture);
+    frame=cvCreateImage(cvSize( (int)(rframe->width/1.4),(int)(rframe->height/1.4) ),rframe->depth,3);
     facep=cvCreateImage(cvGetSize(frame),frame->depth,3);
     OFDInit(frame);
     cvNamedWindow("face1",CV_WINDOW_AUTOSIZE);
@@ -43,7 +45,8 @@ int main(int argc, char *argv[])
     cvMoveWindow("procam",0,100);
     while (true)
     {
-      frame=cvQueryFrame(capture);
+      rframe=cvQueryFrame(capture);
+      cvResize(rframe,frame);
       flist=OFaceDetect(frame,facep);
       for (int i=0;i<flist.size();i++)
       {
@@ -74,6 +77,7 @@ int main(int argc, char *argv[])
       if (cvWaitKey(1)>=0)
         break;
 	}
+    cvReleaseImage(&frame);
     cvReleaseCapture(&capture);
     OFDRelease();
   }
