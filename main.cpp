@@ -14,6 +14,7 @@ using namespace cv;
 #include "IC.h"
 #include "CL.h"
 #include "FD.h"
+#
 const int maxlongint=2147483647;
 
 int main(int argc, char *argv[])
@@ -34,19 +35,19 @@ int main(int argc, char *argv[])
     frame=cvQueryFrame(capture);
     facep=cvCreateImage(cvGetSize(frame),frame->depth,3);
     OFDInit(frame);
-    cvNamedWindow("cam0",CV_WINDOW_AUTOSIZE);
-    cvMoveWindow("cam0",0,100);
+    // cvNamedWindow("cam0",CV_WINDOW_AUTOSIZE);
+    // cvMoveWindow("cam0",0,100);
     cvNamedWindow("procam",CV_WINDOW_AUTOSIZE);
-    cvMoveWindow("procam",700,100);
+    cvMoveWindow("procam",0,100);
     while (true)
     {
       frame=cvQueryFrame(capture);
       flist=OFaceDetect(frame,facep);
       for (int i=0;i<flist.size();i++)
         cvRectangle(facep,cvPoint(flist[i].x,flist[i].y),cvPoint(flist[i].x+flist[i].width,flist[i].y+flist[i].height),CV_RGB(255,0,0));
-      cvShowImage("cam0",frame);
+      //cvShowImage("cam0",frame);
       cvShowImage("procam",facep);
-      if (cvWaitKey(20)>=0)
+      if (cvWaitKey(1)>=0)
         break;
 	}
     cvReleaseCapture(&capture);
@@ -62,10 +63,10 @@ int main(int argc, char *argv[])
     IplImage* dst=cvCreateImage(cvGetSize(src),src->depth,1);
     OI10nC10n(src,icp);
     OCoarsePoints(icp,cpp);
-    OFineLocate(icp,dst,cpp);
+    //OFineLocate(icp,dst,cpp);
     cvNamedWindow("DCT",CV_WINDOW_AUTOSIZE);
     cvMoveWindow("DCT",300,100);
-    cvShowImage("DCT",dst);
+    cvShowImage("DCT",cpp);
     if (cvWaitKey(0)>=0)
     {
       cvReleaseImage(&icp);

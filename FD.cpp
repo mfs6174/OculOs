@@ -93,55 +93,55 @@ inline void GetE(IplImage *src)
 
 inline void WhiteBalance(IplImage *src,IplImage *dst,CvMat *mt)
 {
+  //BwImage ssh(wp0);
   RgbImage ssh(src);
-  RgbImage dsh(wp0);
   int i,j;
   double rr,gg;
   int r,g,b;
-  // for (i=0;i<src->height;i++)
-  //   for (j=0;j<src->width;j++)
-  //   {
-  //     // CV_MAT_ELEM(*mii,float,0,0)=ssh[i][j].r;
-  //     // CV_MAT_ELEM(*mii,float,0,1)=ssh[i][j].g;
-  //     // CV_MAT_ELEM(*mii,float,0,2)=ssh[i][j].b;
-  //     // cvMatMul(mii,mt,mi);
-  //     // for (int k=0;k<3;k++)
-  //     // {
-  //     //   CV_MAT_ELEM(*mi,float,0,k)*=b;
-  //     //   if (CV_MAT_ELEM(*mi,float,0,k)<0)
-  //     //     CV_MAT_ELEM(*mi,float,0,k)=0;
-  //     //   if (CV_MAT_ELEM(*mi,float,0,k)>255)
-  //     //     CV_MAT_ELEM(*mi,float,0,k)=255;
-  //     // }
-  //     // dsh[i][j].r=CV_MAT_ELEM(*mi,float,0,0);
-  //     // dsh[i][j].g=CV_MAT_ELEM(*mi,float,0,1);
-  //     // dsh[i][j].b=CV_MAT_ELEM(*mi,float,0,2);
-  //     r=ssh[i][j].r*kr;
-  //     g=ssh[i][j].g*kg;
-  //     b=ssh[i][j].b*kb;
-  //     if (r>255)
-  //       dsh[i][j].r=255;
-  //     else
-  //       dsh[i][j].r=r;
-  //     if (g>255)
-  //       dsh[i][j].g=255;
-  //     else
-  //       dsh[i][j].g=g;
-  //     if (b>255)
-  //       dsh[i][j].b=255;
-  //     else
-  //       dsh[i][j].b=b;
-  //   }
+  for (i=0;i<src->height;i++)
+    for (j=0;j<src->width;j++)
+    {
+      // CV_MAT_ELEM(*mii,float,0,0)=ssh[i][j].r;
+      // CV_MAT_ELEM(*mii,float,0,1)=ssh[i][j].g;
+      // CV_MAT_ELEM(*mii,float,0,2)=ssh[i][j].b;
+      // cvMatMul(mii,mt,mi);
+      // for (int k=0;k<3;k++)
+      // {
+      //   CV_MAT_ELEM(*mi,float,0,k)*=b;
+      //   if (CV_MAT_ELEM(*mi,float,0,k)<0)
+      //     CV_MAT_ELEM(*mi,float,0,k)=0;
+      //   if (CV_MAT_ELEM(*mi,float,0,k)>255)
+      //     CV_MAT_ELEM(*mi,float,0,k)=255;
+      // }
+      // dsh[i][j].r=CV_MAT_ELEM(*mi,float,0,0);
+      // dsh[i][j].g=CV_MAT_ELEM(*mi,float,0,1);
+      // dsh[i][j].b=CV_MAT_ELEM(*mi,float,0,2);
+      r=ssh[i][j].r*kr;
+      g=ssh[i][j].g*kg;
+      b=ssh[i][j].b*kb;
+      if (r>255)
+        ssh[i][j].r=255;
+      else
+        ssh[i][j].r=r;
+      if (g>255)
+        ssh[i][j].g=255;
+      else
+        ssh[i][j].g=g;
+      if (b>255)
+        ssh[i][j].b=255;
+      else
+        ssh[i][j].b=b;
+    }
   cvSmooth(src,dst,CV_MEDIAN);
-  dsh=RgbImage(dst);
+  RgbImage dsh(dst);
   for (i=0;i<src->height;i++)
     for (j=0;j<src->width;j++)
     {
       double sum=dsh[i][j].r+dsh[i][j].b+dsh[i][j].g;
       rr=dsh[i][j].r/sum;
       gg=dsh[i][j].g/sum;
-      if (rr>0.35 && rr<0.55 && gg<qp[(int)(rr/0.0001)] && gg>qm[(int)(rr/0.0001)])
-        if ( sqr(rr-0.33)+sqr(gg-0.33)>0.008 )
+      if (rr>0.4 && rr<0.6 && gg<qp[(int)(rr/0.0001)] && gg>qm[(int)(rr/0.0001)])
+        if ( sqr(rr-0.33)+sqr(gg-0.33)>0.01 )
         {
           fa[i][j]=-1;
         }
@@ -204,7 +204,7 @@ void OFDInit(IplImage *src)
   CV_MAT_ELEM(*mr,float,0,0)=1;
   CV_MAT_ELEM(*mg,float,1,1)=1;
   CV_MAT_ELEM(*mb,float,2,2)=1;
-  wp0=cvCreateImage(cvGetSize(src),src->depth,3);
+  wp0=cvCreateImage(cvGetSize(src),src->depth,1);
   W=src->width;
   H=src->height;
   for (int i=0;i<=10000;i++)
@@ -212,7 +212,9 @@ void OFDInit(IplImage *src)
     double rr=i*0.0001;
     qp[i]=(-1.3767*sqr(rr)+1.0743*rr+0.1452);
     qm[i]=(-0.776*sqr(rr)+0.5601*rr+0.1766);
-  } 
+  }
+  cvNamedWindow("procam",CV_WINDOW_AUTOSIZE);
+  cvMoveWindow("procam",700,100);
 }
 
 void OFDRelease()
@@ -270,6 +272,7 @@ vector<CvRect> OFaceDetect(IplImage *src,IplImage *dst)
   double beta=cvNorm(OP)/cvNorm(OE);
   memset(fa,0,sizeof(fa));
   WhiteBalance(src,dst,mtt);
+  cvShowImage("procam",wp0);
   sdidx=0;
   memset(ar,0,sizeof(ar));
   //memset(cn,0,sizeof(cn));
@@ -280,11 +283,10 @@ vector<CvRect> OFaceDetect(IplImage *src,IplImage *dst)
         flag=true;
         FloodFill(i,j);
       }
-  int ccc=0;
   for (int i=1;i<=sdidx;i++)
   {
     int w=cn[i][3]-cn[i][2],h=cn[i][1]-cn[i][0];
-    if (ar[i]>=19200 && h<=2.5*w && h>=0.4*w)
+    if (ar[i]>=10000 && h<=2.5*w && h>=0.4*w) //&& w*h>=14400)
       list.push_back(cvRect(cn[i][2],cn[i][0],w,h));
   }
   return list;
