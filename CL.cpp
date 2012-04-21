@@ -6,7 +6,7 @@
 using namespace std;
 using namespace cv;
 
-const int wdsz=5/2;
+const int wdsz=3/2;
 
 inline uchar PeakThresh(int x,int y,IplImage *src)
 {
@@ -52,6 +52,8 @@ void OCoarsePoints(IplImage *src,IplImage *dst)
   cvThreshold(bh, bh, trhd, 255, CV_THRESH_BINARY);
   BwImage wpsh(dst);
   int bd=bh->height/3;
+  if (bh->height>bh->width*1.5)
+    bd=bh->height/2;
   for (int i=0;i<bh->height;i++)
     for (int j=0;j<bh->width;j++)
       if (fsh[i][j]>0 && i<=bd)

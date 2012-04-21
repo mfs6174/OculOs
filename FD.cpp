@@ -86,9 +86,9 @@ inline void GetE(IplImage *src)
     g+=gsum[i];
     b+=bsum[i];
   }
-  CV_MAT_ELEM(*OE,float,0,0)=r/mm;
-  CV_MAT_ELEM(*OE,float,0,1)=g/mm;
-  CV_MAT_ELEM(*OE,float,0,2)=b/mm;
+  //CV_MAT_ELEM(*OE,float,0,0)=r/mm;
+  //CV_MAT_ELEM(*OE,float,0,1)=g/mm;
+  //CV_MAT_ELEM(*OE,float,0,2)=b/mm;
  
 }
 
@@ -143,7 +143,7 @@ inline void WhiteBalance(IplImage *src,IplImage *dst,CvMat *mt)
       gg=dsh[i][j].g/sum;
       stsh[i][j]=0;
       if (rr>0.4 && rr<0.6 && gg<qp[(int)(rr/0.0001)] && gg>qm[(int)(rr/0.0001)])
-        if ( sqr(rr-0.33)+sqr(gg-0.33)>0.0075 )
+        if ( sqr(rr-0.33)+sqr(gg-0.33)>0.006 )
         {
           stsh[i][j]=255;
         }

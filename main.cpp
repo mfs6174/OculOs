@@ -22,14 +22,70 @@ int main(int argc, char *argv[])
 {
   IplImage* src=NULL;
   OFLInit();
+  if (argc==3 && argv[1][0]=='p')
+  {
+    cvNamedWindow("face1",CV_WINDOW_AUTOSIZE);
+    cvMoveWindow("face1",700,100);
+    cvNamedWindow("propic",CV_WINDOW_AUTOSIZE);
+    cvMoveWindow("propic",0,100);
+    IplImage *frame=NULL;
+    IplImage *rframe=NULL;
+    rframe=cvLoadImage(argv[2],CV_LOAD_IMAGE_ANYCOLOR);
+    if(!rframe)
+    {
+      cout<<"Could not load image file: "<<argv[1]<<endl;
+      exit(0);
+    }
+    frame=cvCreateImage(cvSize(900,600),rframe->depth,3);
+    cvResize(rframe,frame);
+    OFDInit(frame);
+    IplImage* facep=NULL;
+    vector<CvRect> flist;
+	facep=cvCreateImage(cvGetSize(frame),frame->depth,3);
+    flist=OFaceDetect(frame,facep);
+    for (int i=0;i<flist.size();i++)
+    {
+      cvSetImageROI(facep,flist[i]);
+      IplImage *sgrp=cvCreateImage(cvSize(flist[i].width,flist[i].height),frame->depth,1);
+      IplImage *dgrp=cvCreateImage(cvSize(flist[i].width,flist[i].height),frame->depth,1);
+      IplImage *cpp=cvCreateImage(cvSize(flist[i].width,flist[i].height),frame->depth,1);
+      cvCvtColor(facep,sgrp,CV_BGR2GRAY);
+      OI10nC10n(sgrp,sgrp);
+      OCoarsePoints(sgrp,cpp);
+      int rtr;
+      rtr=OFineLocate(sgrp,dgrp,cpp,false);
+      //cout<<rtr<<endl;
+      cvResetImageROI(facep);
+      if (rtr>0)
+      {
+        cvRectangle(facep,cvPoint(flist[i].x,flist[i].y),cvPoint(flist[i].x+flist[i].width,flist[i].y+flist[i].height),CV_RGB(0,255,0));
+        cvShowImage("face1",dgrp);
+      }
+      else
+        cvRectangle(facep,cvPoint(flist[i].x,flist[i].y),cvPoint(flist[i].x+flist[i].width,flist[i].y+flist[i].height),CV_RGB(255,0,0));
+      cvReleaseImage(&sgrp);
+      cvReleaseImage(&dgrp);
+      cvReleaseImage(&cpp);
+    }
+    cvShowImage("propic",facep);
+    if (cvWaitKey(0)>=0)
+    {
+      cvReleaseImage(&facep);
+      cvReleaseImage(&frame);
+      cvReleaseImage(&rframe);
+      cvDestroyAllWindows();
+    }
+    OFDRelease();
+    exit(0);
+  }
   if (argc<2)
   {
     CvCapture* capture = NULL;
-	IplImage* rframe = NULL;
+    IplImage* rframe = NULL;
     IplImage* facep=NULL;
     IplImage *frame=NULL;
     vector<CvRect> flist;
-	capture = cvCaptureFromCAM(0);
+    capture = cvCaptureFromCAM(0);
     if (!cvGrabFrame(capture))
     {
       cout<<"can not capture"<<endl;
@@ -78,6 +134,7 @@ int main(int argc, char *argv[])
         break;
 	}
     cvReleaseImage(&frame);
+    cvReleaseImage(&facep);
     cvReleaseCapture(&capture);
     OFDRelease();
   }
@@ -126,6 +183,7 @@ int main(int argc, char *argv[])
         cvReleaseImage(&icp);
         cvReleaseImage(&cpp);
         cvReleaseImage(&dst);
+        cvReleaseImage(&src);
       }
     }
     cout<<"Fail "<<scnt[3]+scnt[0]<<endl;

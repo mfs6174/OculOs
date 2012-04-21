@@ -22,6 +22,11 @@ void OFLInit()
 int OFineLocate(IplImage *src,IplImage *dst,IplImage *mask,bool flag)
 {
   int w,h,x,y;
+  int ndiv;
+  if (src->height>src->width*1.5)
+    ndiv=2;
+  else
+    ndiv=3;
   static int ms=flag?1:7;
   int minw=(int)(src->width/2.2),minh=(int)(minw*0.65);
   cvCopy(src,dst);
@@ -36,7 +41,7 @@ int OFineLocate(IplImage *src,IplImage *dst,IplImage *mask,bool flag)
   bool hei;
   int lp[5]={10000,-1,10000,-1},rp[5]={10000,-1,10000,-1};
   hei=false;
-  for (int i=0;i<src->height/3;i++)
+  for (int i=0;i<src->height/ndiv;i++)
     for (int j=0;j<src->width/2;j++)
       if (sh0[i][j])
       {
@@ -71,7 +76,7 @@ int OFineLocate(IplImage *src,IplImage *dst,IplImage *mask,bool flag)
                         ,
                         Size(15, 15) );
   hei=false;
-  for (int i=0;i<src->height/3;i++)
+  for (int i=0;i<src->height/ndiv;i++)
     for (int j=src->width/2+1;j<src->width;j++)
       if (sh0[i][j])
       {
