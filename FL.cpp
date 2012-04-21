@@ -56,11 +56,11 @@ void OFineLocate(IplImage *src,IplImage *dst,IplImage *mask,bool flag)
   cvSetImageROI(src,eal);
   sROI=Mat(src);
   cas.detectMultiScale( sROI, leyes,
-                        1.25, 1, 0
-                        //|CV_HAAR_FIND_BIGGEST_OBJECT
+                        1.05, 1, 0
+                        |CV_HAAR_FIND_BIGGEST_OBJECT
                         //|CV_HAAR_DO_ROUGH_SEARCH
                         //|CV_HAAR_DO_CANNY_PRUNING
-                        |CV_HAAR_SCALE_IMAGE
+                        //|CV_HAAR_SCALE_IMAGE
                         ,
                         Size(15, 15) );
   for (int i=0;i<src->height/3;i++)
@@ -87,11 +87,11 @@ void OFineLocate(IplImage *src,IplImage *dst,IplImage *mask,bool flag)
   cvSetImageROI(src,cvRect(x,y,w,h));
   sROI=Mat(src);
   cas.detectMultiScale( sROI, reyes,
-                        1.25, 1, 0
+                        1.05, 1, 0
                         |CV_HAAR_FIND_BIGGEST_OBJECT
                         //|CV_HAAR_DO_ROUGH_SEARCH
                         //|CV_HAAR_DO_CANNY_PRUNING
-                        |CV_HAAR_SCALE_IMAGE
+                        //|CV_HAAR_SCALE_IMAGE
                         ,
                         Size(15, 15) );
   cvResetImageROI(dst);
