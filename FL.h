@@ -2,7 +2,7 @@
 #define FL_H
 
 void OFLInit();
-void OFineLocate(IplImage *src,IplImage *dst,IplImage *mask,bool flag);
+int OFineLocate(IplImage *src,IplImage *dst,IplImage *mask,bool flag);
 
 
 #endif

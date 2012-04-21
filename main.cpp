@@ -57,24 +57,55 @@ int main(int argc, char *argv[])
   }
   else
   {
-    src=cvLoadImage(argv[1],CV_LOAD_IMAGE_ANYCOLOR);
-    if(!src)
-      cout<<"Could not load image file: "<<argv[1]<<endl;
-    IplImage* icp=cvCreateImage(cvGetSize(src),src->depth,1);
-    IplImage* cpp=cvCreateImage(cvGetSize(src),src->depth,1);
-    IplImage* dst=cvCreateImage(cvGetSize(src),src->depth,1);
-    OI10nC10n(src,icp);
-    OCoarsePoints(icp,cpp);
-    OFineLocate(icp,dst,cpp,true);
+    int waittime=0;
+    vector<string> pics;
+    pics.clear();
     cvNamedWindow("result",CV_WINDOW_AUTOSIZE);
-    cvMoveWindow("result",300,100);
-    cvShowImage("result",dst);
-    if (cvWaitKey(0)>=0)
+    cvMoveWindow("result",300,100); 
+    if (argc==2)
     {
-      cvReleaseImage(&icp);
-      cvReleaseImage(&cpp);
-      cvReleaseImage(&dst);
+      pics.push_back(string(argv[1]));
+      waittime=0;
     }
+    else
+    {
+      ifstream inf(argv[2]);
+      string is;
+      while (inf>>is)
+        pics.push_back(is);
+      waittime=1;
+    }
+    int scnt[5]={0},acnt=0;
+    for (int it=0;it<pics.size();it++)
+    {
+      src=cvLoadImage(pics[it].c_str(),CV_LOAD_IMAGE_ANYCOLOR);
+      if(!src)
+      {
+        cout<<"Could not load image file: "<<argv[1]<<endl;
+        continue;
+      }
+      acnt++;
+      IplImage* icp=cvCreateImage(cvGetSize(src),src->depth,1);
+      IplImage* cpp=cvCreateImage(cvGetSize(src),src->depth,1);
+      IplImage* dst=cvCreateImage(cvGetSize(src),src->depth,1);
+      OI10nC10n(src,icp);
+      OCoarsePoints(icp,cpp);
+      int rtr;
+      rtr=OFineLocate(icp,dst,cpp,true);
+      //cout<<rtr<<endl;
+      scnt[rtr]++;
+      cvShowImage("result",dst);
+      if (cvWaitKey(waittime)>=0)
+      {
+        cvReleaseImage(&icp);
+        cvReleaseImage(&cpp);
+        cvReleaseImage(&dst);
+      }
+    }
+    cout<<"Fail "<<scnt[3]+scnt[0]<<endl;
+    cout<<"Success1 "<<scnt[1]<<endl;
+    cout<<"Success2 "<<scnt[2]<<endl;
+    cout<<"Success "<<scnt[1]+scnt[2]<<'/'<<acnt<<endl;
   }
   cvDestroyAllWindows();
   return 0;
