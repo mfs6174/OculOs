@@ -37,8 +37,8 @@ int main(int argc, char *argv[])
     frame=cvQueryFrame(capture);
     facep=cvCreateImage(cvGetSize(frame),frame->depth,3);
     OFDInit(frame);
-    // cvNamedWindow("cam0",CV_WINDOW_AUTOSIZE);
-    // cvMoveWindow("cam0",0,100);
+    cvNamedWindow("face1",CV_WINDOW_AUTOSIZE);
+    cvMoveWindow("face1",700,100);
     cvNamedWindow("procam",CV_WINDOW_AUTOSIZE);
     cvMoveWindow("procam",0,100);
     while (true)
@@ -46,8 +46,30 @@ int main(int argc, char *argv[])
       frame=cvQueryFrame(capture);
       flist=OFaceDetect(frame,facep);
       for (int i=0;i<flist.size();i++)
-        cvRectangle(facep,cvPoint(flist[i].x,flist[i].y),cvPoint(flist[i].x+flist[i].width,flist[i].y+flist[i].height),CV_RGB(255,0,0));
-      //cvShowImage("cam0",frame);
+      {
+        cvSetImageROI(facep,flist[i]);
+        IplImage *sgrp=cvCreateImage(cvSize(flist[i].width,flist[i].height),frame->depth,1);
+        IplImage *dgrp=cvCreateImage(cvSize(flist[i].width,flist[i].height),frame->depth,1);
+        IplImage *cpp=cvCreateImage(cvSize(flist[i].width,flist[i].height),frame->depth,1);
+        cvCvtColor(facep,sgrp,CV_BGR2GRAY);
+        OI10nC10n(sgrp,sgrp);
+        OCoarsePoints(sgrp,cpp);
+        int rtr;
+        rtr=OFineLocate(sgrp,dgrp,cpp,false);
+        //cout<<rtr<<endl;
+        cvResetImageROI(facep);
+        if (rtr>0)
+        {
+          cvRectangle(facep,cvPoint(flist[i].x,flist[i].y),cvPoint(flist[i].x+flist[i].width,flist[i].y+flist[i].height),CV_RGB(0,255,0));
+          cvShowImage("face1",dgrp);
+        }
+        else
+           cvRectangle(facep,cvPoint(flist[i].x,flist[i].y),cvPoint(flist[i].x+flist[i].width,flist[i].y+flist[i].height),CV_RGB(255,0,0));
+         
+        cvReleaseImage(&sgrp);
+        cvReleaseImage(&dgrp);
+        cvReleaseImage(&cpp);
+      }
       cvShowImage("procam",facep);
       if (cvWaitKey(1)>=0)
         break;

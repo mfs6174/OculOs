@@ -285,7 +285,7 @@ vector<CvRect> OFaceDetect(IplImage *src,IplImage *dst)
       }
   for (int i=1;i<=sdidx;i++)
   {
-    int w=cn[i][3]-cn[i][2],h=cn[i][1]-cn[i][0];
+    int w=(cn[i][3]-cn[i][2])&(~1),h=(cn[i][1]-cn[i][0])&(~1);
     if (ar[i]>=10000 && h<=2.5*w && h>=0.4*w) //&& w*h>=14400)
       list.push_back(cvRect(cn[i][2],cn[i][0],w,h));
   }
