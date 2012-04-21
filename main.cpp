@@ -14,12 +14,14 @@ using namespace cv;
 #include "IC.h"
 #include "CL.h"
 #include "FD.h"
-#
+#include "FL.h"
+
 const int maxlongint=2147483647;
 
 int main(int argc, char *argv[])
 {
   IplImage* src=NULL;
+  OFLInit();
   if (argc<2)
   {
     CvCapture* capture = NULL;
@@ -63,10 +65,10 @@ int main(int argc, char *argv[])
     IplImage* dst=cvCreateImage(cvGetSize(src),src->depth,1);
     OI10nC10n(src,icp);
     OCoarsePoints(icp,cpp);
-    //OFineLocate(icp,dst,cpp);
-    cvNamedWindow("DCT",CV_WINDOW_AUTOSIZE);
-    cvMoveWindow("DCT",300,100);
-    cvShowImage("DCT",cpp);
+    OFineLocate(icp,dst,cpp,true);
+    cvNamedWindow("result",CV_WINDOW_AUTOSIZE);
+    cvMoveWindow("result",300,100);
+    cvShowImage("result",dst);
     if (cvWaitKey(0)>=0)
     {
       cvReleaseImage(&icp);
