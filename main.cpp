@@ -190,7 +190,6 @@ int main(int argc, char *argv[])
       rtr=OFineLocate(icp,dst,cpp,true,cplist,1);
       //cout<<rtr<<endl;
       scnt[rtr]++;
-      //cvShowImage("result",dst);
       string sta;
       if (rtr==0)
         sta="00";
@@ -203,13 +202,17 @@ int main(int argc, char *argv[])
       string fname="./result/"+sta+pics[it];
       if(!cvSaveImage(fname.c_str(),dst))
         printf("Could not save: %s\n", fname.c_str());
-      // if (cvWaitKey(waittime)>=0)
-      //{
+      if (pics.size()==1)
+      {
+        cvShowImage("result",dst);
+        if (cvWaitKey(waittime)>=0)
+        {
+        }
+      }
       cvReleaseImage(&icp);
       cvReleaseImage(&cpp);
       cvReleaseImage(&dst);
       cvReleaseImage(&src);
-      //}
     }
     cout<<"Fail "<<scnt[3]+scnt[0]<<endl;
     cout<<"Success1 "<<scnt[1]<<endl;
