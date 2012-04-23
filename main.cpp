@@ -21,6 +21,8 @@ const int maxlongint=2147483647;
 int main(int argc, char *argv[])
 {
   IplImage* src=NULL;
+  CvScalar color=CV_RGB(255,0,0);
+  CrossPoint cplist[2];
   OFLInit();
   if (argc==3 && argv[1][0]=='p')
   {
@@ -53,12 +55,18 @@ int main(int argc, char *argv[])
       OI10nC10n(sgrp,sgrp);
       OCoarsePoints(sgrp,cpp);
       int rtr;
-      rtr=OFineLocate(sgrp,dgrp,cpp,false);
+      rtr=OFineLocate(sgrp,dgrp,cpp,false,cplist,7);
       //cout<<rtr<<endl;
       cvResetImageROI(facep);
       if (rtr>0)
       {
         cvRectangle(facep,cvPoint(flist[i].x,flist[i].y),cvPoint(flist[i].x+flist[i].width,flist[i].y+flist[i].height),CV_RGB(0,255,0));
+        for (int j=0;j<2;j++)
+        {
+          cplist[j]+=cvPoint(flist[i].x,flist[i].y);
+          cvLine(facep,cplist[j].h0,cplist[j].h1,color,1);
+          cvLine(facep,cplist[j].v0,cplist[j].v1,color,1);
+        }
         cvShowImage("face1",dgrp);
       }
       else
@@ -114,17 +122,22 @@ int main(int argc, char *argv[])
         OI10nC10n(sgrp,sgrp);
         OCoarsePoints(sgrp,cpp);
         int rtr;
-        rtr=OFineLocate(sgrp,dgrp,cpp,false);
+        rtr=OFineLocate(sgrp,dgrp,cpp,true,cplist,10);
         //cout<<rtr<<endl;
         cvResetImageROI(facep);
         if (rtr>0)
         {
           cvRectangle(facep,cvPoint(flist[i].x,flist[i].y),cvPoint(flist[i].x+flist[i].width,flist[i].y+flist[i].height),CV_RGB(0,255,0));
-          cvShowImage("face1",dgrp);
+          for (int j=0;j<2;j++)
+          {
+            cplist[j]+=cvPoint(flist[i].x,flist[i].y);
+            cvLine(facep,cplist[j].h0,cplist[j].h1,color,1);
+            cvLine(facep,cplist[j].v0,cplist[j].v1,color,1);
+          }
         }
         else
            cvRectangle(facep,cvPoint(flist[i].x,flist[i].y),cvPoint(flist[i].x+flist[i].width,flist[i].y+flist[i].height),CV_RGB(255,0,0));
-         
+        cvShowImage("face1",dgrp);
         cvReleaseImage(&sgrp);
         cvReleaseImage(&dgrp);
         cvReleaseImage(&cpp);
@@ -174,17 +187,29 @@ int main(int argc, char *argv[])
       OI10nC10n(src,icp);
       OCoarsePoints(icp,cpp);
       int rtr;
-      rtr=OFineLocate(icp,dst,cpp,true);
+      rtr=OFineLocate(icp,dst,cpp,true,cplist,1);
       //cout<<rtr<<endl;
       scnt[rtr]++;
-      cvShowImage("result",dst);
-      if (cvWaitKey(waittime)>=0)
-      {
-        cvReleaseImage(&icp);
-        cvReleaseImage(&cpp);
-        cvReleaseImage(&dst);
-        cvReleaseImage(&src);
-      }
+      //cvShowImage("result",dst);
+      string sta;
+      if (rtr==0)
+        sta="00";
+      if (rtr==3)
+        sta="03";
+      if (rtr==1)
+        sta="1";
+      if (rtr==2)
+        sta="2";
+      string fname="./result/"+sta+pics[it];
+      if(!cvSaveImage(fname.c_str(),dst))
+        printf("Could not save: %s\n", fname.c_str());
+      // if (cvWaitKey(waittime)>=0)
+      //{
+      cvReleaseImage(&icp);
+      cvReleaseImage(&cpp);
+      cvReleaseImage(&dst);
+      cvReleaseImage(&src);
+      //}
     }
     cout<<"Fail "<<scnt[3]+scnt[0]<<endl;
     cout<<"Success1 "<<scnt[1]<<endl;
